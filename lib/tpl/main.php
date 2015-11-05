@@ -182,7 +182,6 @@ $servers = $console->getServers();
                         <?php require_once dirname(__FILE__) . '/modalAddServer.php'; ?>
                         <?php require_once dirname(__FILE__) . '/modalFilterServer.php'; ?>
                     <?php endif; ?>
-                    ?>
                 <?php elseif (!$tube):?>
                     <div id="idAllTubes">
                         <?php require_once dirname(__FILE__) . '/allTubes.php'; ?>
