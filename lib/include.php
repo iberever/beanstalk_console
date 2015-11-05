@@ -65,7 +65,7 @@ class Console {
     public function getServerStats($server) {
         try {
             $interface = new BeanstalkInterface($server);
-            $stats = $interface->getServerStats();
+            $stats = $interface->getServerStats($server);
         } catch (Pheanstalk_Exception_ConnectionException $e) {
             $stats = array();
         }
@@ -187,10 +187,10 @@ class Console {
         }
     }
 
-    public function getTubeStatValues($tube) {
+    public function getTubeStatValues($server,$tube) {
         // make sure, that rapid tube disappearance (eg: anonymous tubes, don't kill the interface, as they might be missing)
         try {
-            return $this->interface->_client->statsTube($tube);
+            return $this->interface->_client[$server]->statsTube($tube);
         } catch (Pheanstalk_Exception_ServerException $ex) {
             if (strpos($ex->getMessage(), Pheanstalk_Response::RESPONSE_NOT_FOUND) !== false) {
                 return array();
@@ -341,7 +341,7 @@ class Console {
             $stats = $this->interface->getTubesStats();
 
             $this->_tplVars['tubesStats'] = $stats;
-            $this->_tplVars['peek'] = $this->interface->peekAll($this->_globalVar['tube']);
+            $this->_tplVars['peek'] = $this->interface->peekAll($this->_globalVar['server'],$this->_globalVar['tube']);
             $this->_tplVars['contentType'] = $this->interface->getContentType();
             if (!empty($_GET['action'])) {
                 $funcName = "_action" . ucfirst($this->_globalVar['action']);

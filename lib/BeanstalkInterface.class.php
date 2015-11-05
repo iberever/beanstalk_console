@@ -4,24 +4,39 @@ class BeanstalkInterface {
 
     protected $_contentType;
     public $_client;
+    protected $_servers;
 
-    public function __construct($server) {
-        if (strpos($server, "beanstalk://") === 0) {
-            $url = parse_url($server);
-            $host = $url['host'];
-            $port = $url['port'];
-        } else {
-            $list = explode(':', $server);
-            $host = $list[0];
-            $port = isset($list[1]) ? $list[1] : '';
+    public function __construct($servers) {
+        if (!is_array($servers)) {
+            $servers = array($servers);
         }
-        $this->_client = new Pheanstalk($host, $port);
+        foreach($servers as $server) {
+            if (strpos($server, "beanstalk://") === 0) {
+                $url = parse_url($server);
+                $host = $url['host'];
+                $port = $url['port'];
+            } else {
+                $list = explode(':', $server);
+                $host = $list[0];
+                $port = isset($list[1]) ? $list[1] : '';
+            }
+            $this->_client[$server] = new Pheanstalk($host, $port);
+            $this->_servers[] = $server;
+        }
     }
 
-    public function getTubes() {
-        $tubes = $this->_client->listTubes();
-        sort($tubes);
-        return $tubes;
+    public function getTubes($servers=array()) {
+        if(count($servers) === 0) {
+            $servers = $this->_servers;
+        }
+        $result = array();
+        foreach($servers as $server) {
+            $tubes = $this->_client[$server]->listTubes();
+            sort($tubes);
+            $result[$server] = $tubes;
+        }
+
+        return $result;
     }
 
     public static function getServerStatsFields() {
@@ -75,10 +90,10 @@ class BeanstalkInterface {
         );
     }
 
-    public function getServerStats() {
+    public function getServerStats($server) {
         $fields = $this->getServerStatsFields();
         $stats = array();
-        $object = $this->_client->stats();
+        $object = $this->_client[$server]->stats();
         foreach ($fields as $key => $description) {
             if (isset($object[$key])) {
                 $stats[$key] = array(
@@ -93,13 +108,18 @@ class BeanstalkInterface {
 
     public function getTubesStats() {
         $stats = array();
-        foreach ($this->getTubes() as $tube) {
-            $stats[] = $this->getTubeStats($tube);
+        foreach ($this->getTubes() as $server => $tubesByServer) {
+            foreach($tubesByServer as $serverTubes) {
+                $tubes = !is_array($serverTubes) ? array($serverTubes) : $serverTubes;
+                foreach($tubes as $tube) {
+                    $stats[$server][] = $this->getTubeStats($server,$tube);
+                }
+            }
         }
         return $stats;
     }
 
-    public function getTubeStats($tube) {
+    public function getTubeStats($server,$tube) {
         $stats = array();
         $descr = array(
             'name' => 'the tube\'s name',
@@ -130,7 +150,8 @@ class BeanstalkInterface {
             'cmd-pause-tube' => 'Pause(cmd)',
             'pause' => 'Pause(sec)',
             'pause-time-left' => 'Pause(left)');
-        foreach ($this->_client->statsTube($tube) as $key => $value) {
+
+        foreach ($this->_client[$server]->statsTube($tube) as $key => $value) {
             if (!array_key_exists($key, $nameTube)) {
                 continue;
             }
@@ -143,23 +164,23 @@ class BeanstalkInterface {
         return $stats;
     }
 
-    public function peekReady($tube) {
-        return $this->_peek($tube, 'peekReady');
+    public function peekReady($server,$tube) {
+        return $this->_peek($server,$tube, 'peekReady');
     }
 
-    public function peekDelayed($tube) {
-        return $this->_peek($tube, 'peekDelayed');
+    public function peekDelayed($server,$tube) {
+        return $this->_peek($server,$tube, 'peekDelayed');
     }
 
-    public function peekBuried($tube) {
-        return $this->_peek($tube, 'peekBuried');
+    public function peekBuried($server,$tube) {
+        return $this->_peek($server,$tube, 'peekBuried');
     }
 
-    public function peekAll($tube) {
+    public function peekAll($server,$tube) {
         return array(
-            'ready' => $this->peekReady($tube),
-            'delayed' => $this->peekDelayed($tube),
-            'buried' => $this->peekBuried($tube));
+            'ready' => $this->peekReady($server,$tube),
+            'delayed' => $this->peekDelayed($server,$tube),
+            'buried' => $this->peekBuried($server,$tube));
     }
 
     public function kick($tube, $limit) {
@@ -203,20 +224,27 @@ class BeanstalkInterface {
      *
      * @var Pheanstalk
      */
-    private function _peek($tube, $method) {
-        try {
-            $job = $this->_client->useTube($tube)->{$method}();
-            $peek = array(
-                'id' => $job->getId(),
-                'data' => $job->getData(),
-                'stats' => $this->_client->statsJob($job));
-        } catch (Exception $ex) {
-            $peek = array();
+    private function _peek($servers,$tube, $method) {
+        if (!is_array($servers)) {
+            $servers = array($servers);
         }
-        if ($peek) {
-            $peek['data'] = $this->_decodeDate($peek['data']);
+        $result = array();
+        foreach ($servers as $server) {
+            try {
+                $job = $this->_client[$server]->useTube($tube)->{$method}();
+                $peek = array(
+                    'id' => $job->getId(),
+                    'data' => $job->getData(),
+                    'stats' => $this->_client->statsJob($job));
+            } catch (Exception $ex) {
+                $peek = array();
+            }
+            if ($peek) {
+                $peek['data'] = $this->_decodeDate($peek['data']);
+            }
+            $result[$server] = $peek;
         }
-        return $peek;
+        return $result;
     }
 
     private function _decodeDate($pData) {
