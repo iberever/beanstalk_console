@@ -8,8 +8,12 @@ $visible = $console->getTubeStatVisible();
     <div class="row">
         <div class="col-sm-12">
             <?php foreach($tubes as $server => $tubesByServer): ?>
-                <table class="table table-striped table-hover">
-                    <thead>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><?php echo $server; ?></h3>
+                    </div>
+                    <table class="table table-striped table-hover">
+                        <thead>
                         <tr>
                             <th>name</th>
                             <?php
@@ -19,8 +23,8 @@ $visible = $console->getTubeStatVisible();
                                 <th<?php echo $markHidden ?>  name="<?php echo $key ?>" title="<?php echo $item ?>"><?php echo $key ?></th>
                             <?php endforeach; ?>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         <?php foreach ((is_array($tubesByServer) ? $tubesByServer : array($tubesByServer)) as $tubeItem): ?>
                             <tr>
                                 <td name="<?php echo $key ?>"><a href="index.php?server=<?php echo $server ?>&tube=<?php echo $tubeItem ?>"><?php echo $tubeItem ?></a>
@@ -34,8 +38,9 @@ $visible = $console->getTubeStatVisible();
                                 <?php endforeach; ?>
                             </tr>
                         <?php endforeach ?>
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
+                </div>
             <?php endforeach; ?>
         </div>
     </div>
