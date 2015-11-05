@@ -87,14 +87,11 @@ $servers = $console->getServers();
                                         All tubes <span class="caret"></span>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <?php
-                                        if (isset($tubes) && is_array($tubes)) {
-                                            foreach ($tubes as $tubeItem) {
-                                                ?>
+                                        <?php if (isset($tubes) && is_array($tubes)):?>
+                                            <?php foreach ($tubes as $tubeItem): ?>
                                                 <li><a href="index.php?server=<?php echo $server ?>&tube=<?php echo $tubeItem ?>"><?php echo $tubeItem ?></a></li>
-                                            <?php }
-                                        }
-                                        ?>
+                                            <?php endforeach; ?>
+                                        <?php endif;?>
                                     </ul>
                                 </li>
                             <?php else: ?>
@@ -166,10 +163,9 @@ $servers = $console->getServers();
                     <!--/.nav-collapse -->
                 </div>
             </div>
+        <?php endif ?>
 
-            <div class="container">
-            <?php endif ?>
-
+        <div class="container">
             <?php if (!empty($errors)): ?>
                 <?php foreach ($errors as $item): ?>
                     <p class="alert alert-error"><span class="label label-important">Error</span> <?php echo $item ?></p>
@@ -177,41 +173,35 @@ $servers = $console->getServers();
             <?php else: ?>
                 <?php if (isset($_tplPage)): ?>
                     <?php include(dirname(__FILE__) . '/' . $_tplPage . '.php') ?>
-                    <?php elseif (!$server): ?>
+                <?php elseif (!$server): ?>
                     <div id="idServers">
-                        <?php
-                        include(dirname(__FILE__) . '/serversList.php');
-                        ?>
+                        <?php include(dirname(__FILE__) . '/serversList.php'); ?>
                     </div>
                     <div id="idServersCopy" style="display:none"></div>
-                    <?php
-                    if ($tplVars['_tplMain'] != 'ajax') {
-                        require_once dirname(__FILE__) . '/modalAddServer.php';
-                        require_once dirname(__FILE__) . '/modalFilterServer.php';
-                    }
+                    <?php if ($tplVars['_tplMain'] != 'ajax'): ?>
+                        <?php require_once dirname(__FILE__) . '/modalAddServer.php'; ?>
+                        <?php require_once dirname(__FILE__) . '/modalFilterServer.php'; ?>
+                    <?php endif; ?>
                     ?>
-                <?php elseif (!$tube):
-                    ?>
+                <?php elseif (!$tube):?>
                     <div id="idAllTubes">
                         <?php require_once dirname(__FILE__) . '/allTubes.php'; ?>
-        <?php require_once dirname(__FILE__) . '/modalClearTubes.php'; ?>
+                        <?php require_once dirname(__FILE__) . '/modalClearTubes.php'; ?>
                     </div>
                     <div id='idAllTubesCopy' style="display:none"></div>
-                <?php elseif (!in_array($tube, $tubes)):
-                    ?>
+                <?php elseif (!in_array($tube, $tubes)):?>
                     <?php echo sprintf('Tube "%s" not found or it is empty', $tube) ?>
-                    <br><br><a href="./?server=<?php echo $server ?>"> << back </a>
-                <?php else:
-                    ?>
+                    <br><br1><a href="./?server=<?php echo $server ?>"> << back </a>
+                <?php else:?>
                     <?php require_once dirname(__FILE__) . '/currentTube.php'; ?>
                     <?php require_once dirname(__FILE__) . '/modalAddJob.php'; ?>
                     <?php require_once dirname(__FILE__) . '/modalAddSample.php'; ?>
                 <?php endif; ?>
-                <?php if (!isset($_tplPage)) { ?>
+                <?php if (!isset($_tplPage)): ?>
                     <?php require_once dirname(__FILE__) . '/modalFilterColumns.php'; ?>
-                <?php } ?>
+                <?php endif; ?>
                 <?php require_once dirname(__FILE__) . '/modalSettings.php'; ?>
-<?php endif; ?>
+            <?php endif; ?>
         </div>
 
         <script src='assets/vendor/jquery/jquery.js'></script>
@@ -219,9 +209,10 @@ $servers = $console->getServers();
         <script src="js/jquery.cookie.js"></script>
         <script src="js/jquery.regexp.js"></script>
         <script src="assets/vendor/bootstrap/js/bootstrap.min.js"></script>
-<?php if (isset($_COOKIE['isDisabledJobDataHighlight']) and $_COOKIE['isDisabledJobDataHighlight'] != 1) { ?>
+        <?php if (isset($_COOKIE['isDisabledJobDataHighlight']) and $_COOKIE['isDisabledJobDataHighlight'] != 1): ?>
             <script src="highlight/highlight.pack.js"></script>
-            <script>hljs.initHighlightingOnLoad();</script><?php } ?>
+            <script>hljs.initHighlightingOnLoad();</script>
+        <?php endif; ?>
         <script src="js/customer.js"></script>
     </body>
 </html>
