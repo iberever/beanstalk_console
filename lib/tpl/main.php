@@ -97,8 +97,7 @@ $servers = $console->getServers();
                                         ?>
                                     </ul>
                                 </li>
-                            <?php else:
-                                ?>
+                            <?php else: ?>
                                 <li class="dropdown">
                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                                         All servers <span class="caret"></span>
@@ -106,28 +105,23 @@ $servers = $console->getServers();
                                     <ul class="dropdown-menu">
                                         <?php foreach ($servers as $serverItem): ?>
                                             <li><a href="index.php?server=<?php echo $serverItem ?>"><?php echo $serverItem ?></a></li>
-        <?php endforeach ?>
+                                        <?php endforeach ?>
                                     </ul>
                                 </li>
-    <?php endif ?>
+                            <?php endif; ?>
                         </ul>
-
                         <ul class="nav navbar-nav navbar-right">
                             <li class="dropdown">
                                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">Toolbox <span class="caret"></span></a>
                                 <ul class="dropdown-menu">
-                                    <?php if (!isset($_tplPage) && !$server) { ?>
+                                    <?php if (!isset($_tplPage) && !$server) : ?>
                                         <li><a href="#filterServer" role="button" data-toggle="modal">Filter columns</a></li>
-                                        <?php
-                                    } elseif (!isset($_tplPage) && $server) {
-                                        ?>
+                                        <?php elseif (!isset($_tplPage) && $server): ?>
                                         <li><a href="#filter" role="button" data-toggle="modal">Filter columns</a></li>
-                                        <?php
-                                    }
-                                    if ($server && !$tube) {
-                                        ?>
+                                        <?php endif;?>
+                                    <?php if ($server && !$tube) : ?>
                                         <li><a href="#clear-tubes" role="button" data-toggle="modal">Clear multiple tubes</a></li>
-    <?php } ?>
+                                    <?php endif; ?>
                                     <li><a href="index.php?action=manageSamples" role="button">Manage samples</a></li>
                                     <li class="divider"></li>
                                     <li><a href="#settings" role="button" data-toggle="modal">Edit settings</a></li>
@@ -142,21 +136,21 @@ $servers = $console->getServers();
                                     <li><a href="https://github.com/ptrofimov/beanstalk_console">Beanstalk console (github)</a></li>
                                 </ul>
                             </li>
-    <?php if ($server && !$tube) { ?>
+                                <?php if ($server && !$tube): ?>
                                 <li>
                                     <button type="button" id="autoRefresh" class="btn btn-default btn-small">
                                         <span class="glyphicon glyphicon-refresh"></span>
                                     </button>
                                 </li>
-    <?php } else if (!$tube) { ?>
-                                <li>
-                                    <button type="button" id="autoRefreshSummary" class="btn btn-default btn-small">
-                                        <span class="glyphicon glyphicon-refresh"></span>
-                                    </button>
-                                </li>
-                        <?php } ?>
+                                <?php elseif (!$tube) : ?>
+                                    <li>
+                                        <button type="button" id="autoRefreshSummary" class="btn btn-default btn-small">
+                                            <span class="glyphicon glyphicon-refresh"></span>
+                                        </button>
+                                    </li>
+                                <?php endif; ?>
                         </ul>
-    <?php if (isset($server, $tube) && $server && $tube) { ?>
+                        <?php if (isset($server, $tube) && $server && $tube): ?>
                             <form  class="navbar-form navbar-right" style="margin-top:5px;margin-bottom:0px;" role="search" action="" method="get">
                                 <input type="hidden" name="server" value="<?php echo $server; ?>"/>
                                 <input type="hidden" name="tube" value="<?php echo $tube; ?>"/>
@@ -167,7 +161,7 @@ $servers = $console->getServers();
                                     <input type="text" class="form-control input-sm search-query" name="searchStr" placeholder="Search this tube">
                                 </div>
                             </form>
-    <?php } ?>
+                        <?php endif; ?>
                     </div>
                     <!--/.nav-collapse -->
                 </div>
